@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: mph
+Version: 0+unknown
+Summary: A Python implementation that solves the Frenkel-Holstein Hamiltonian
+Author: Karthik Gururangan
+Author-email: gururang@msu.edu
+License: BSD-3-Clause
+Description-Content-Type: text/markdown
