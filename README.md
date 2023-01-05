@@ -10,4 +10,13 @@ terms, and higher-order spectroscopy simulations, such as pump-prope and 2D elec
 # Installation
 Create a conda environment with Numpy, Matplotlib, and Numba installed. Clone this repository and run
 make. The given makefile will install the package locally and it can be used as shown in the examples.
+For convenience, a yml file is added so that all you need to do is
+
+```conda env create -f environment.yml```
+
+The environment name by default is ```mph_env```. Then, activate the environment with
+
+```conda activate mph_env```,
+
+and run ```make```.
 
