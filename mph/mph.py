@@ -13,14 +13,18 @@ class MPH:
         self.omega = omega         # Harmonic vibrational frequency
         self.J = J                 # Intermolecular Coulombic coupling (array of length nmol)
         self.lambda_f = lambda_f   # Neutral Frenkel exciton-phonon coupling
-        self.r2max = r2max         # Maximum cutoff length for 2-particle states
 
-        # By default, construct all possible 2p states
+        # k is the range of k points, corresponding to k = 2*pi*i*n/N, n = -N/2,...,N/2
+        self.k = np.asarray([2.0*np.pi/self.nmol * n for n in range(-self.nmol//2, self.nmol//2 + 1)])
+
+        self.r2max = r2max         # Maximum cutoff length for 2-particle states (set to 0 to turn off 2p states)
+        # By default, construct all possible 2p states |pu,(p+s)v>, where s = +/- 1, 2, 3, ..., nmol/2
         if self.r2max == -1:
             self.r2max = self.nmol // 2
+        self.s = np.asarray(list(range(-self.r2max, self.r2max + 1)))
+        if self.r2max == 1:
+            print("WARNING: 2p states do not couple to 1p states when r2max = 1. This is the same as r2max = 0, except the Hamiltonian will have many 0 eigenvalues. Be careful!")
 
-        self.s = np.asarray(list(range(-self.r2max + 1, self.r2max + 1)))
-        self.k = np.asarray([2.0*np.pi/self.nmol * n for n in range(-self.nmol//2 + 1, self.nmol//2 + 1)])
         self.index_1p, self.dim_1p = self.get_index_1p()
         self.index_2p, self.dim_2p = self.get_index_2p()
         self.dim = self.dim_1p + self.dim_2p

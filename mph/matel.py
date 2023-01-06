@@ -28,8 +28,8 @@ def build_1p1p(H, k, nmol, vibmax, Ef, omega, J, index_1p, fcmat):
             j = index_1p[v2]
 
             L = 0.0
-            for s, Jk in enumerate(J):
-                L += 2.0 * Jk * np.cos(k*s)
+            for s in range(nmol):
+                L += 2.0 * J[s] * np.cos(k*s)
             H[i, j] += L * fcmat[0, v1] * fcmat[0, v2]
 
     return H
@@ -83,10 +83,9 @@ def build_2p2p(H, k, nmol, vibmax, Ef, omega, J, srange, index_2p, fcmat):
 
                             # Linker-type coupling
                             if vv1 == vv2 and s1 + s2 != 0:
-                                ds = s1 - s2
-                                # Bring distance inside aggregate range, if necessary
-                                if ds < srange[0]: ds += nmol
-                                if ds >= srange[-1]: ds -= nmol
+                                # Excitation transfer is s1-s2, wrap around for periodic boundary conditions
+                                ds = np.mod(s1 - s2, nmol)
+                                if ds == 0: continue # protect against case where s1 = s2; excitation transfer distance should be > 0
                                 H[i, j] += J[abs(ds)] * fcmat[0, v1] * fcmat[0, v2] * np.exp(-1j*k*ds)
 
                             # Exchange-type coupling
