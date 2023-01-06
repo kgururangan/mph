@@ -6,7 +6,7 @@ The following definition of the Hamiltonian is used
     V = \sum_{mn}' J(m-n) A_n+A_m + J(n-m) A_m^+A_n. 
 The delocalized Bloch states used are
     (1p) |ku> = N**(-1/2) \sum_p exp(ikp) |pu>
-    (2p) |ku,sv> = N**(-1/2) \sum_p exp(ikp) |pu,sv>.
+    (2p) |ku,sv> = N**(-1/2) \sum_p exp(ikp) |pu,(p+s)v>.
 """
 
 import numpy as np
