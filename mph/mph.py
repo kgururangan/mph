@@ -55,7 +55,7 @@ class MPH:
             self.evals[ik, :] = e[isort]
             self.evecs[ik, :, :] = v[:, isort]
 
-    def get_abs_spectrum(self, gamma):
+    def get_abs_spectrum(self, gamma, window=None):
         
         for i, val in enumerate(self.k):
             if val == 0:
@@ -69,7 +69,8 @@ class MPH:
                                                                           self.dim, 
                                                                           self.index_1p, 
                                                                           self.fcmat,
-                                                                          gamma)
+                                                                          gamma,
+                                                                          window)
 
         
 

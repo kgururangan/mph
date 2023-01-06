@@ -1,8 +1,18 @@
 Metadata-Version: 2.1
 Name: mph
-Version: 0+unknown
+Version: 0+untagged.3.g1e0e602.dirty
 Summary: A Python implementation that solves the Frenkel-Holstein Hamiltonian
 Author: Karthik Gururangan
 Author-email: gururang@msu.edu
 License: BSD-3-Clause
 Description-Content-Type: text/markdown
+
+# mph
+MPH, or Many-Particle Holstein is essentially just a Python translation of the exciton1D 
+code written by Nicholas Hestand (https://github.com/nicholashestand/exciton1d). The code
+constructs and diagonalizes the Frenkel-Holstein Hamiltonian for a molecular aggregate
+in the basis of 1- and 2-particle excitonic states, and uses the resulting eigenvalues
+and eigenvectors to compute the absorption spectrum. In the future, I plan on adding
+a few things, including a PDF showing derivations for all matrix elements, 3-particle and higher
+terms, and higher-order spectroscopy simulations, such as pump-prope and 2D electronic spectroscopy.
+

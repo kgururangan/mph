@@ -2,7 +2,7 @@ import numpy as np
 from numba import njit
 
 @njit
-def compute_absorption(evecs, evals, omega, vibmax, dim, index_1p, fcmat, gamma):
+def compute_absorption(evecs, evals, omega, vibmax, dim, index_1p, fcmat, gamma, window=None):
 
     energy  = evals/omega
     gamma /= omega
@@ -26,9 +26,13 @@ def compute_absorption(evecs, evals, omega, vibmax, dim, index_1p, fcmat, gamma)
     # Calculate the absorption spectrum
     nsteps = int(np.floor((energy_range + 8.0*gamma)/(10/omega))) # 10 cm-1 resolution
 
-    # Restrict to a 10,000 cm-1 window
+    # Restrict to a user-defined spectral window
     nsteps = min(nsteps, 1000)
-    step = (min(max_energy, min_energy + 10000/omega) - min_energy + 8.0*gamma)/nsteps
+    if window is None:
+        spec_range = min(max_energy, min_energy + 10000/omega) - min_energy + 8.0*gamma
+    else:
+        spec_range = window/omega + 8.0*gamma
+    step = spec_range / nsteps
 
     # Compute absorbance
     photon_energy = np.zeros(nsteps)

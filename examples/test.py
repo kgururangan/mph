@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from mph import MPH
-from utilities import plot_spectrum, print_1p_index, print_2p_index
+from mph.mph import MPH
+from mph.utilities import plot_spectrum, print_1p_index, print_2p_index
 
 if __name__ == "__main__":
 

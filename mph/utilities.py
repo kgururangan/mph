@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-def plot_spectrum(H):
+def plot_spectrum(H, nroot=1):
 
     fig = plt.figure(figsize=(8.0,6.0))
 
@@ -14,11 +14,12 @@ def plot_spectrum(H):
 
     #plot the dispersion with matplotlib
     plt.subplot(2,1,2)
-    plt.plot( H.k/np.pi, H.evals[:, 0]/H.omega, c='b' )
-    plt.scatter( H.k/np.pi, H.evals[:, 0]/H.omega, color='b')
+    for i in range(nroot):
+        plt.plot( H.k/np.pi, H.evals[:, i]/H.omega )
+        plt.scatter( H.k/np.pi, H.evals[:, i]/H.omega, s=5 )
     plt.xlabel(r'k ($\pi$)')
     plt.ylabel(r'Energy (h$\omega$)')
-    plt.title('Lowest Exciton Dispersion')
+    plt.title('Exciton Dispersion')
     plt.tight_layout()
     plt.show()
     plt.close()
