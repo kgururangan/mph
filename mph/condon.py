@@ -15,11 +15,21 @@ def volap(lambda1, v1, lambda2, v2):
 
     return overlap
 
-def fcmatrix(vibmax, lambda_f):
+def fcmatrix(vibmax, lambda_f, lambda_c, lambda_a):
 
-    fcmat = np.zeros((vibmax, vibmax))
+    fcmat = {'gf' : np.zeros((vibmax, vibmax)), # ground-to-frenkel
+             'gc' : np.zeros((vibmax, vibmax)), # ground-to-cation
+             'ga' : np.zeros((vibmax, vibmax)), # ground-to-anion
+             'cf' : np.zeros((vibmax, vibmax)), # cation-to-frenkel
+             'af' : np.zeros((vibmax, vibmax))} # anion-to-frenkel
+
     for v1 in range(vibmax):
         for v2 in range(vibmax):
-            fcmat[v1, v2] = volap(0.0, v1, lambda_f, v2)
+            fcmat['gf'][v1, v2] = volap(0.0, v1, lambda_f, v2)
+            fcmat['gc'][v1, v2] = volap(0.0, v1, lambda_c, v2)
+            fcmat['ga'][v1, v2] = volap(0.0, v1, lambda_a, v2)
+            fcmat['cf'][v1, v2] = volap(lambda_c, v1, lambda_f, v2)
+            fcmat['af'][v1, v2] = volap(lambda_a, v1, lambda_f, v2)
 
     return fcmat
+

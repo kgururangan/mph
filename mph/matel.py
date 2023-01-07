@@ -84,7 +84,11 @@ def build_2p2p(H, k, nmol, vibmax, Ef, omega, J, srange, index_2p, fcmat):
                             # Linker-type coupling
                             if vv1 == vv2 and s1 + s2 != 0:
                                 # Excitation transfer is s1-s2, wrap around for periodic boundary conditions
-                                ds = np.mod(s1 - s2, nmol)
+
+                                if s1 - s2 > srange[-1]: ds = s1 - s2 + nmol
+                                elif s1 - s2 < srange[0]: ds = s1 - s2 - nmol
+                                else: ds = s1 - s2
+
                                 if ds == 0: continue # protect against case where s1 = s2; excitation transfer distance should be > 0
                                 H[i, j] += J[abs(ds)] * fcmat[0, v1] * fcmat[0, v2] * np.exp(-1j*k*ds)
 
@@ -93,3 +97,76 @@ def build_2p2p(H, k, nmol, vibmax, Ef, omega, J, srange, index_2p, fcmat):
                                 H[i, j] += J[abs(s1)] * fcmat[vv2, v1] * fcmat[vv1, v2] * np.exp(-1j*k*s1)
 
     return H
+
+@njit
+def build_1pct(H, k, nmol, vibmax, omega, te, th, sctrange, index_1p, index_ct, fcmat_gc, fcmat_ga, fcmat_cf, fcmat_af):
+
+    for v1 in range(vibmax):
+        i = index_1p[v1]
+
+        for vc in range(vibmax):
+            for s in sctrange:
+                for va in range(vibmax):
+                    j = index_ct[vc, s, va]
+                    if j == -1: continue
+
+                    H[i, j] += te[abs(s)] * fcmat_ga[0, va] * fcmat_cf[vc, v1]
+                    H[i, j] += th[abs(s)] * fcmat_gc[0, vc] * fcmat_af[va, v1] * np.exp(1j*k*s)
+
+                    H[j, i] = np.conj(H[i, j])
+    return H
+
+@njit 
+def build_2pct(H, k, nmol, vibmax, omega, te, th, srange, sctrange, index_2p, index_ct, fcmat_gc, fcmat_ga, fcmat_cf, fcmat_af):
+
+    for v1 in range(vibmax):
+        for s1 in srange:
+            for vv1 in range(vibmax):
+                i = index_2p[v1, s1, vv1]
+                if i == -1: continue
+
+                for vc in range(vibmax):
+                    for s2 in sctrange:
+                        for va in range(vibmax):
+                            j = index_ct[vc, s2, va]
+                            if j == -1: continue
+
+                            if -s2 > sctrange[-1]: s3 = -np.mod(s2, 2)#s3 = -s2 - nmol
+                            elif -s2 < sctrange[0]: s3 = np.mod(s3 = -s2 + nmol
+                            else: s3 = -s2
+
+                            if s1 == s2:
+                                H[i, j] += te[abs(s1)] * fcmat_ga[vv1, va] * fcmat_cf[vc, v1]
+                            if s1 == s3:
+                                H[i, j] += th[abs(s1)] * fcmat_gc[vv1, vc] * fcmat_af[va, v1] * np.exp(1j*k*s3)
+
+                            H[j, i] = np.conj(H[i, j])
+    return H
+
+@njit
+def build_ctct(H, k, nmol, vibmax, ECT, ECTInf, omega, te, th, sctrange, index_ct, fcmat_gc, fcmat_ga):
+
+    for vc1 in range(vibmax):
+        for s1 in sctrange:
+            for va1 in range(vibmax):
+                i = index_ct[vc1, s1, va1]
+                if i == -1: continue
+
+                H[i, i] += (ECTInf*(abs(s1)-1) + ECT)/abs(s1) + (vc1 + va1) * omega
+
+                for vc2 in range(vibmax):
+                    for s2 in sctrange:
+                        for va2 in range(vibmax):
+                            j = index_ct[vc2, s2, va2]
+                            if j == -1: continue
+
+                            if s2 - s1 > sctrange[-1]: s = (s2 - s1) - nmol
+                            elif s2 - s1 < sctrange[0]: s = (s2 - s1) + nmol
+                            else: s = s2 - s1
+
+                            if vc1 == vc2:
+                                H[i, j] += te[abs(s)] * fcmat_ga[0, va1] * fcmat_ga[0, va2]
+                            if va1 == va2:
+                                H[i, j] += th[abs(s)] * fcmat_gc[0, vc1] * fcmat_gc[0, vc2] * np.exp(1j*k*s)
+    return H
+
