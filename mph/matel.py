@@ -99,25 +99,25 @@ def build_2p2p(H, k, nmol, vibmax, Ef, omega, J, srange, index_2p, fcmat):
     return H
 
 @njit
-def build_1pct(H, k, nmol, vibmax, omega, te, th, sctrange, index_1p, index_ct, fcmat_gc, fcmat_ga, fcmat_cf, fcmat_af):
+def build_1pct(H, k, nmol, vibmax, omega, te, th, index_1p, index_ct, fcmat_gc, fcmat_ga, fcmat_cf, fcmat_af):
 
     for v1 in range(vibmax):
         i = index_1p[v1]
 
         for vc in range(vibmax):
-            for s in sctrange:
+            for s in range(-1, 2):
                 for va in range(vibmax):
                     j = index_ct[vc, s, va]
                     if j == -1: continue
 
-                    H[i, j] += te[abs(s)] * fcmat_ga[0, va] * fcmat_cf[vc, v1]
-                    H[i, j] += th[abs(s)] * fcmat_gc[0, vc] * fcmat_af[va, v1] * np.exp(1j*k*s)
+                    H[i, j] += te * fcmat_ga[0, va] * fcmat_cf[vc, v1]
+                    H[i, j] += th * fcmat_gc[0, vc] * fcmat_af[va, v1] * np.exp(1j*k*s)
 
                     H[j, i] = np.conj(H[i, j])
     return H
 
 @njit 
-def build_2pct(H, k, nmol, vibmax, omega, te, th, srange, sctrange, index_2p, index_ct, fcmat_gc, fcmat_ga, fcmat_cf, fcmat_af):
+def build_2pct(H, k, nmol, vibmax, omega, te, th, srange, index_2p, index_ct, fcmat_gc, fcmat_ga, fcmat_cf, fcmat_af):
 
     for v1 in range(vibmax):
         for s1 in srange:
@@ -126,28 +126,30 @@ def build_2pct(H, k, nmol, vibmax, omega, te, th, srange, sctrange, index_2p, in
                 if i == -1: continue
 
                 for vc in range(vibmax):
-                    for s2 in sctrange:
+                    for s2 in range(-1, 2):
                         for va in range(vibmax):
                             j = index_ct[vc, s2, va]
                             if j == -1: continue
 
-                            if -s2 > sctrange[-1]: s3 = -np.mod(s2, 2)#s3 = -s2 - nmol
-                            elif -s2 < sctrange[0]: s3 = np.mod(s3 = -s2 + nmol
-                            else: s3 = -s2
+                            # Enforcing periodic boundary conditions?
+                            #if -s2 > nmol // 2: s3 = -s2 - nmol
+                            #elif -s2 < nmol // 2: s3 = -s2 + nmol
+                            #else: s3 = -s2
 
+                            s3 = -s2
                             if s1 == s2:
-                                H[i, j] += te[abs(s1)] * fcmat_ga[vv1, va] * fcmat_cf[vc, v1]
+                                H[i, j] += te * fcmat_ga[vv1, va] * fcmat_cf[vc, v1]
                             if s1 == s3:
-                                H[i, j] += th[abs(s1)] * fcmat_gc[vv1, vc] * fcmat_af[va, v1] * np.exp(1j*k*s3)
+                                H[i, j] += th * fcmat_gc[vv1, vc] * fcmat_af[va, v1] * np.exp(1j*k*s3)
 
                             H[j, i] = np.conj(H[i, j])
     return H
 
 @njit
-def build_ctct(H, k, nmol, vibmax, ECT, ECTInf, omega, te, th, sctrange, index_ct, fcmat_gc, fcmat_ga):
+def build_ctct(H, k, nmol, vibmax, ECT, ECTInf, omega, te, th, index_ct, fcmat_gc, fcmat_ga):
 
     for vc1 in range(vibmax):
-        for s1 in sctrange:
+        for s1 in range(-1, 2):
             for va1 in range(vibmax):
                 i = index_ct[vc1, s1, va1]
                 if i == -1: continue
@@ -155,18 +157,22 @@ def build_ctct(H, k, nmol, vibmax, ECT, ECTInf, omega, te, th, sctrange, index_c
                 H[i, i] += (ECTInf*(abs(s1)-1) + ECT)/abs(s1) + (vc1 + va1) * omega
 
                 for vc2 in range(vibmax):
-                    for s2 in sctrange:
+                    for s2 in range(-1, 2):
                         for va2 in range(vibmax):
                             j = index_ct[vc2, s2, va2]
                             if j == -1: continue
 
-                            if s2 - s1 > sctrange[-1]: s = (s2 - s1) - nmol
-                            elif s2 - s1 < sctrange[0]: s = (s2 - s1) + nmol
-                            else: s = s2 - s1
+                            s = s2 - s1
+
+                            # Enforcing periodic boundary conditions?
+                            #if s > nmol // 2: s = s - nmol
+                            #elif s < nmol // 2: s = s + nmol
+
+                            if abs(s) != 1: continue
 
                             if vc1 == vc2:
-                                H[i, j] += te[abs(s)] * fcmat_ga[0, va1] * fcmat_ga[0, va2]
+                                H[i, j] += te * fcmat_ga[0, va1] * fcmat_ga[0, va2]
                             if va1 == va2:
-                                H[i, j] += th[abs(s)] * fcmat_gc[0, vc1] * fcmat_gc[0, vc2] * np.exp(1j*k*s)
+                                H[i, j] += th * fcmat_gc[0, vc1] * fcmat_gc[0, vc2] * np.exp(1j*k*(s2-s1))
     return H
 

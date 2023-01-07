@@ -26,13 +26,13 @@ def index_2p(vibmax, srange, ct_1p):
 
     return idx_2p, ct_2p
 
-def index_ct(vibmax, sctrange, ct_1p2p):
+def index_ct(vibmax, ct_1p2p):
 
-    idx_ct = -np.ones((vibmax, len(sctrange), vibmax), dtype=int)
+    idx_ct = -np.ones((vibmax, 3, vibmax), dtype=int)
 
     ct_ct = 0
     for v1 in range(vibmax):
-        for s in sctrange:
+        for s in range(-1, 2):
             if s == 0: continue
             for v2 in range(vibmax):
                 if v1 + v2 > vibmax - 1: continue

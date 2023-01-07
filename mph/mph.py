@@ -6,14 +6,16 @@ import mph.spectrum as spectrum
 
 class MPH:
 
-    def __init__(self, nmol, vibmax, omega, Ef, ECT, ECTInf, J, te, th, lambda_f, lambda_c, lambda_a, r2max=-1, rctmax=0):
+    def __init__(self, nmol, vibmax, omega, Ef, J, lambda_f, r2max=-1, ECT=0.0, ECTInf=0.0, te=0.0, th=0.0, lambda_c=0.0, lambda_a=0.0, do_ct=False):
         self.nmol = nmol           # Number of molecules
         self.vibmax = vibmax       # Maximum number of vibrational quanta
         self.Ef = Ef               # On-site Frenkel exciton energy
-        self.ECT = ECT             # Energy of nearest-neighbor separated CT state
-        self.ECTInf = ECTInf       # Energy of CT state at infinite separation
         self.omega = omega         # Harmonic vibrational frequency
         self.J = J                 # Intermolecular Coulombic coupling (array of length nmol)
+
+        self.do_ct = do_ct         # Flag to turn on/off CT states (default is off)
+        self.ECT = ECT             # Energy of nearest-neighbor separated CT state
+        self.ECTInf = ECTInf       # Energy of CT state at infinite separation
         self.te = te               # Electron CT hopping integral
         self.th = th               # Hole CT hopping integral
         self.lambda_f = lambda_f   # Neutral Frenkel exciton-phonon coupling
@@ -37,14 +39,16 @@ class MPH:
             self.r2max = self.nmol // 2
         self.s = np.asarray(list(range(-self.r2max, self.r2max + 1)))
 
-        self.rctmax = rctmax         # Maximum cutoff length for CT states (default is 0 to turn off CT states; set to 1 for NN coupling)
-        self.sct = np.asarray(list(range(-self.rctmax, self.rctmax + 1)))
+        #self.rctmax = rctmax         # Maximum cutoff length for CT states (default is 0 to turn off CT states; set to 1 for NN coupling)
+        #self.sct = np.asarray(list(range(-self.rctmax, self.rctmax + 1)))
 
         self.index_1p, self.dim_1p = self.get_index_1p()
         self.index_2p, self.dim_2p = self.get_index_2p()
-        self.index_ct, self.dim_ct = self.get_index_ct()
-
-        self.dim = self.dim_1p + self.dim_2p + self.dim_ct
+        if self.do_ct:
+            self.index_ct, self.dim_ct = self.get_index_ct()
+            self.dim = self.dim_1p + self.dim_2p + self.dim_ct
+        else:
+            self.dim = self.dim_1p + self.dim_2p
 
         self.fcmat = self.get_fc_matrix()
 
@@ -55,7 +59,7 @@ class MPH:
         return index.index_2p(self.vibmax, self.s, self.dim_1p)
 
     def get_index_ct(self):
-        return index.index_ct(self.vibmax, self.sct, self.dim_1p + self.dim_2p)
+        return index.index_ct(self.vibmax, self.dim_1p + self.dim_2p)
 
     def get_fc_matrix(self):
         return condon.fcmatrix(self.vibmax, self.lambda_f, self.lambda_c, self.lambda_a)
@@ -82,20 +86,20 @@ class MPH:
                                      self.fcmat['gf'])
 
             # Include CT states
-            if self.rctmax > 0:
+            if self.do_ct:
                 H = matel.build_1pct(H, k, self.nmol, self.vibmax, 
                                      self.omega, self.te, self.th,
-                                     self.sct, self.index_1p, self.index_ct, 
+                                     self.index_1p, self.index_ct, 
                                      self.fcmat["gc"], self.fcmat["ga"], self.fcmat["cf"], self.fcmat["af"])
                 # Include 2p states in addition to CT states
                 if self.r2max > 0:
                     H = matel.build_2pct(H, k, self.nmol, self.vibmax, 
                                          self.omega, self.te, self.th, 
-                                         self.s, self.sct, self.index_2p, self.index_ct, 
+                                         self.s, self.index_2p, self.index_ct, 
                                          self.fcmat["gc"], self.fcmat["ga"], self.fcmat["cf"], self.fcmat["af"])
                 H = matel.build_ctct(H, k, self.nmol, self.vibmax, 
                                      self.ECT, self.ECTInf, self.omega, self.te, self.th, 
-                                     self.sct, self.index_ct, 
+                                     self.index_ct, 
                                      self.fcmat["gc"], self.fcmat["ga"])
 
             e, v = np.linalg.eigh(H)
@@ -106,6 +110,7 @@ class MPH:
 
     def get_abs_spectrum(self, gamma, window=None):
         
+        # Find the index of k = 0 state used in optical absorption
         for i, val in enumerate(self.k):
             if val == 0:
                 i0 = i
