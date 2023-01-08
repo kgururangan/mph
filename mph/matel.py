@@ -6,7 +6,8 @@ The following definition of the Hamiltonian is used
     V = \sum_{mn}' J(m-n) A_n+A_m + J(n-m) A_m^+A_n. 
 The delocalized Bloch states used are
     (1p) |ku> = N**(-1/2) \sum_p exp(ikp) |pu>
-    (2p) |ku,sv> = N**(-1/2) \sum_p exp(ikp) |pu,(p+s)v>.
+    (2p) |ku,sv> = N**(-1/2) \sum_p exp(ikp) |pu,(p+s)v>
+    (ct) |ku,sv> = N**(-1/2) \sum_p exp(ikp) |p+u+,(p+s)-v-> (|cation,anion>)
 """
 
 import numpy as np
@@ -83,8 +84,8 @@ def build_2p2p(H, k, nmol, vibmax, Ef, omega, J, srange, index_2p, fcmat):
 
                             # Linker-type coupling
                             if vv1 == vv2 and s1 + s2 != 0:
-                                # Excitation transfer is s1-s2, wrap around for periodic boundary conditions
 
+                                # Excitation transfer is s1-s2, wrap around for periodic boundary conditions
                                 if s1 - s2 > srange[-1]: ds = s1 - s2 + nmol
                                 elif s1 - s2 < srange[0]: ds = s1 - s2 - nmol
                                 else: ds = s1 - s2
