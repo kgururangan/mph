@@ -4,8 +4,9 @@ code written by Dr. Nicholas Hestand (https://github.com/nicholashestand/exciton
 constructs and diagonalizes the Frenkel-Holstein Hamiltonian for a molecular aggregate
 in the basis of 1- and 2-particle excitonic states, and uses the resulting eigenvalues
 and eigenvectors to compute the absorption spectrum. In the future, I plan on adding
-a few things, including a PDF showing derivations for all matrix elements, 3-particle and higher
-terms, and higher-order spectroscopy simulations, such as pump-prope and 2D electronic spectroscopy.
+a few things, including a PDF showing derivations for all matrix elements, multimode
+vibrations and anharmonicity, 3-particle and higher terms, and higher-order spectroscopy simulations, 
+such as pump-prope and 2D electronic spectroscopy.
 
 # Installation
 Create a conda environment with Numpy, Matplotlib, and Numba installed. Clone this repository and run
